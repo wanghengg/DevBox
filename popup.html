@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            width: 300px;
+            padding: 10px;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 5px 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .button-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        input[type="checkbox"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #4CAF50;
+            border-radius: 50%;
+            cursor: pointer;
+            position: relative;
+            vertical-align: middle;
+        }
+        input[type="checkbox"]:checked {
+            background-color: #4CAF50;
+        }
+        input[type="checkbox"]:checked::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 8px;
+            background-color: white;
+            border-radius: 50%;
+        }
+        label {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        #result {
+            margin-top: 10px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <textarea id="jsonInput" placeholder="输入JSON字符串"></textarea>
+    <div class="button-group">
+        <label>
+            <input type="checkbox" id="isEscaped"> 是否转义
+        </label>
+        <button id="parseBtn">反序列化</button>
+    </div>
+    <div id="result"></div>
+    <script src="popup.js"></script>
+</body>
+</html>

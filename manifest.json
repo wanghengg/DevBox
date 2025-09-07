@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "JSON-Tools",
+  "version": "1.0",
+  "description": "自动反序列化输入的JSON字符串",
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "permissions": ["activeTab"]
+}
