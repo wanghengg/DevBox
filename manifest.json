@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "JSON-Tools",
+  "name": "JSON Wizard",
   "version": "1.0",
-  "description": "自动反序列化输入的JSON字符串",
+  "description": "🧙‍♂️一个专为开发者设计的 JSON 瑞士军刀。格式化、验证、编辑、转换……一切 JSON 操作，一键搞定。",
   "action": {
     "default_popup": "popup.html"
   },
