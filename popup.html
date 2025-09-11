@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <style>
         body {
-            width: 300px;
-            padding: 10px;
+            width: 310px;
+            padding: 6px;
         }
         textarea {
             width: 100%;
@@ -202,22 +202,22 @@
         
         /* 时间戳转换功能样式 */
         .timestamp-container {
-            margin-top: 10px;
-            padding: 10px;
+            margin-top: 8px;
+            padding: 8px;
         }
         
         .converter-section {
             background-color: #f9f9f9;
             border: 1px solid #ddd;
             border-radius: 4px;
-            padding: 12px;
-            margin-bottom: 12px;
+            padding: 10px;
+            margin-bottom: 10px;
         }
         
         .converter-row {
             display: flex;
             align-items: center;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
         
         .converter-row:last-child {
@@ -225,10 +225,10 @@
         }
         
         .converter-label {
-            width: 60px;
+            width: 45px;
             font-weight: bold;
             color: #333;
-            margin-right: 8px;
+            margin-right: 4px;
             flex-shrink: 0;
             font-size: 12px;
         }
@@ -236,18 +236,24 @@
         .input-wrapper {
             flex: 1;
             display: flex;
-            gap: 6px;
-            margin-right: 8px;
+            gap: 3px;
+            margin-right: 4px;
         }
         
         .converter-input {
             flex: 1;
-            padding: 6px 8px;
+            padding: 5px 6px;
             border: 1px solid #ccc;
             border-radius: 4px;
             font-size: 12px;
             transition: border-color 0.3s;
             min-width: 0; /* 允许输入框收缩 */
+        }
+        
+        /* 时间戳输入框特殊处理 */
+        #timestampInput {
+            flex: 1;
+            min-width: 150px; /* 确保至少能输入18个字符 */
         }
         
         .converter-input:focus {
@@ -256,25 +262,24 @@
             box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
         }
         
-        /* 时间戳行的特殊处理 */
+        /* 时间戳输入框特殊处理 */
         #timestampInput {
-            flex: 2; /* 输入框占更大比例 */
+            flex: 1;
+            min-width: 100px; /* 确保至少能输入18个字符，但适应更小的宽度 */
         }
         
         .unit-select {
-            flex: 1; /* 下拉选择框占较小比例 */
-            padding: 6px;
+            flex: 0 0 65px; /* 不伸缩，固定宽度65px确保文字完整显示 */
+            padding: 5px;
             border: 1px solid #ccc;
             border-radius: 4px;
             background-color: white;
             font-size: 12px;
             cursor: pointer;
-            min-width: 60px;
-            max-width: 70px;
         }
         
         .convert-btn {
-            padding: 6px 12px;
+            padding: 5px 8px;
             background: #4CAF50;
             color: white;
             border: none;
@@ -283,7 +288,7 @@
             font-size: 12px;
             font-weight: 500;
             transition: background-color 0.3s;
-            min-width: 60px;
+            min-width: 45px;
             flex-shrink: 0;
         }
         
@@ -293,7 +298,7 @@
         
         .button-group-center {
             text-align: center;
-            margin-top: 10px;
+            margin-top: 8px;
         }
         
         .clear-btn {
