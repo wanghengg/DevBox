@@ -15,3 +15,7 @@ Thumbs.db
 
 # Qwen Code files
 QWEN.md
+
+# npm files
+package-lock.json
+package.json
