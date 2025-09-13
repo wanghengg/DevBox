@@ -18,7 +18,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     content.classList.add('active');
                     // 如果切换到时间戳 tab，更新默认时间戳
                     if (tabName === 'timestamp') {
+<<<<<<< HEAD
                         updateAllInputs();
+=======
+                        updateTimestampInput();
+>>>>>>> master
                     }
                 }
             });
@@ -569,6 +573,7 @@ document.addEventListener('DOMContentLoaded', () => {
         easternTimeInput.value = '';
         pacificTimeInput.value = '';
     });
+<<<<<<< HEAD
     
     // 格式转换功能
     const formatInputTop = document.getElementById('formatInputTop');
@@ -729,4 +734,6 @@ document.addEventListener('DOMContentLoaded', () => {
             throw new Error('序列化为目标格式失败: ' + error.message);
         }
     }
+=======
+>>>>>>> master
 });
