@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     content.classList.add('active');
                     // 如果切换到时间戳 tab，更新默认时间戳
                     if (tabName === 'timestamp') {
-                        updateTimestampInput();
+                        updateAllInputs();
                     }
                 }
             });
@@ -575,12 +575,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const formatInputBottom = document.getElementById('formatInputBottom');
     const formatTypeTop = document.getElementById('formatTypeTop');
     const formatTypeBottom = document.getElementById('formatTypeBottom');
-    const convertTopToBottomBtn = document.getElementById('convertTopToBottomBtn');
-    const convertBottomToTopBtn = document.getElementById('convertBottomToTopBtn');
     const formatClearBtn = document.getElementById('formatClearBtn');
+    // 箭头按钮
+    const arrowLeftBtn = document.getElementById('arrowLeftBtn');
+    const arrowRightBtn = document.getElementById('arrowRightBtn');
     
-    // 顶部转换到底部按钮事件
-    convertTopToBottomBtn.addEventListener('click', () => {
+    // 左侧箭头按钮事件 - 将上面的内容转换为下面的格式
+    arrowLeftBtn.addEventListener('click', () => {
         const input = formatInputTop.value.trim();
         if (!input) {
             alert('请输入需要转换的内容');
@@ -590,16 +591,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const sourceType = formatTypeTop.value;
         const targetType = formatTypeBottom.value;
         
+        console.log('转换参数:', { input, sourceType, targetType });
+        
         try {
             const result = convertFormat(input, sourceType, targetType);
             formatInputBottom.value = result;
+            console.log('转换成功:', result);
         } catch (error) {
+            console.error('转换失败:', error);
             alert('转换失败: ' + error.message);
         }
     });
     
-    // 底部转换到顶部按钮事件
-    convertBottomToTopBtn.addEventListener('click', () => {
+    // 右侧箭头按钮事件 - 将下面的内容转换为上面的格式
+    arrowRightBtn.addEventListener('click', () => {
         const input = formatInputBottom.value.trim();
         if (!input) {
             alert('请输入需要转换的内容');
@@ -609,10 +614,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const sourceType = formatTypeBottom.value;
         const targetType = formatTypeTop.value;
         
+        console.log('转换参数:', { input, sourceType, targetType });
+        
         try {
             const result = convertFormat(input, sourceType, targetType);
             formatInputTop.value = result;
+            console.log('转换成功:', result);
         } catch (error) {
+            console.error('转换失败:', error);
             alert('转换失败: ' + error.message);
         }
     });
@@ -625,9 +634,35 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // 格式转换核心函数
     function convertFormat(input, sourceType, targetType) {
+        console.log('开始转换:', { input, sourceType, targetType });
+        
         // 如果源类型和目标类型相同，直接返回输入内容
         if (sourceType === targetType) {
+            console.log('源类型和目标类型相同，直接返回输入内容');
             return input;
+        }
+        
+        // 检查所需的库是否已加载
+        if (sourceType === 'yaml' || targetType === 'yaml') {
+            if (typeof jsyaml === 'undefined') {
+                throw new Error('js-yaml库未加载');
+            }
+            // 检查js-yaml的load方法是否存在
+            if (typeof jsyaml.load !== 'function') {
+                throw new Error('js-yaml库加载不完整');
+            }
+        }
+        
+        if (sourceType === 'toml' || targetType === 'toml') {
+            if (typeof TOML === 'undefined') {
+                throw new Error('@iarna/toml库未加载');
+            }
+        }
+        
+        if (sourceType === 'xml' || targetType === 'xml') {
+            if (typeof X2JS === 'undefined') {
+                throw new Error('x2js库未加载');
+            }
         }
         
         // 解析输入内容为 JavaScript 对象
@@ -639,16 +674,43 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'yaml':
                     // 使用 js-yaml 库解析 YAML
-                    obj = jsyaml.load(input);
+                    console.log('使用js-yaml解析YAML:', input);
+                    console.log('jsyaml全局变量:', window.jsyaml);
+                    // 检查js-yaml库是否正确加载
+                    if (typeof window.jsyaml === 'undefined') {
+                        throw new Error('js-yaml库未正确加载');
+                    }
+                    obj = window.jsyaml.load(input);
+                    console.log('YAML解析结果:', obj);
                     break;
                 case 'toml':
                     // 使用 @iarna/toml 库解析 TOML
-                    obj = TOML.parse(input);
+                    console.log('使用TOML库解析:', input);
+                    console.log('检查TOML库:', typeof window.TOML, window.TOML);
+                    // 检查TOML库是否正确加载
+                    if (typeof window.TOML === 'undefined') {
+                        throw new Error('@iarna/toml库未正确加载');
+                    }
+                    // 检查parse方法是否存在
+                    if (typeof window.TOML.parse !== 'function') {
+                        console.log('TOML对象属性:', Object.keys(window.TOML));
+                        throw new Error('@iarna/toml库缺少parse方法');
+                    }
+                    obj = window.TOML.parse(input);
+                    console.log('TOML解析结果:', obj);
                     break;
                 case 'xml':
                     // 使用 x2js 库解析 XML
-                    const x2js = new X2JS();
+                    console.log('使用x2js解析XML:', input);
+                    console.log('X2JS全局变量:', window.X2JS);
+                    // 检查x2js库是否正确加载
+                    if (typeof window.X2JS === 'undefined') {
+                        throw new Error('x2js库未正确加载');
+                    }
+                    const x2js = new window.X2JS();
+                    console.log('x2js实例:', x2js);
                     obj = x2js.xml2js(input);
+                    console.log('XML解析结果:', obj);
                     break;
                 default:
                     throw new Error('不支持的源格式: ' + sourceType);
@@ -664,13 +726,35 @@ document.addEventListener('DOMContentLoaded', () => {
                     return JSON.stringify(obj, null, 2);
                 case 'yaml':
                     // 使用 js-yaml 库序列化为 YAML
-                    return jsyaml.dump(obj);
+                    console.log('使用js-yaml序列化为YAML:', obj);
+                    return window.jsyaml.dump(obj);
                 case 'toml':
                     // 使用 @iarna/toml 库序列化为 TOML
-                    return TOML.stringify(obj);
+                    console.log('使用TOML库序列化:', obj);
+                    // 检查TOML库是否正确加载
+                    if (typeof window.TOML === 'undefined') {
+                        throw new Error('@iarna/toml库未正确加载');
+                    }
+                    // 检查stringify方法是否存在
+                    if (typeof window.TOML.stringify !== 'function') {
+                        console.log('TOML对象属性:', Object.keys(window.TOML));
+                        throw new Error('@iarna/toml库缺少stringify方法');
+                    }
+                    return window.TOML.stringify(obj);
                 case 'xml':
                     // 使用 x2js 库序列化为 XML
-                    const x2js = new X2JS();
+                    console.log('使用x2js序列化为XML:', obj);
+                    // 检查x2js库是否正确加载
+                    if (typeof window.X2JS === 'undefined') {
+                        throw new Error('x2js库未正确加载');
+                    }
+                    const x2js = new window.X2JS();
+                    console.log('x2js实例:', x2js);
+                    // 检查js2xml方法是否存在
+                    if (typeof x2js.js2xml !== 'function') {
+                        console.log('x2js可用方法:', Object.getOwnPropertyNames(Object.getPrototypeOf(x2js)));
+                        throw new Error('x2js.js2xml方法不存在');
+                    }
                     return x2js.js2xml(obj);
                 default:
                     throw new Error('不支持的目标格式: ' + targetType);

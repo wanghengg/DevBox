@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <!-- 引入格式转换所需的库 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@iarna/toml@2.2.5/index.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/x2js/1.2.0/xml2json.min.js"></script>
+    <script src="libs/js-yaml.min.js"></script>
+    <script src="libs/toml-browser.js"></script>
+    <script src="libs/x2js-lib.js"></script>
     <style>
         body {
             width: 310px;
@@ -353,12 +353,12 @@
             border-radius: 4px;
             padding: 10px;
             margin-bottom: 10px;
+            position: relative; /* 用于定位下拉框 */
         }
         
         .format-row {
             display: flex;
             align-items: flex-start;
-            gap: 10px;
             margin-bottom: 10px;
         }
         
@@ -376,13 +376,26 @@
             font-size: 12px;
             resize: vertical;
             box-sizing: border-box;
+            position: relative;
+            z-index: 1; /* 确保文本框在下拉框上方 */
+        }
+        
+        .format-textarea:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+            z-index: 2; /* 焦点状态下提升层级 */
         }
         
         .format-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
             display: flex;
             flex-direction: column;
             gap: 8px;
-            min-width: 100px;
+            width: 65px; /* 固定宽度 */
+            z-index: 3; /* 调整z-index，确保不遮挡文本框边框 */
         }
         
         .format-type-select {
@@ -392,6 +405,8 @@
             background-color: white;
             font-size: 12px;
             cursor: pointer;
+            width: 100%; /* 占满容器宽度 */
+            box-sizing: border-box;
         }
         
         .format-arrows {
@@ -401,25 +416,80 @@
             margin: 10px 0;
         }
         
-        .arrow-up-down {
+        .arrow-container {
             display: flex;
-            flex-direction: column;
+            flex-direction: row; /* 水平排列 */
+            justify-content: center; /* 居中对齐 */
             align-items: center;
-            gap: 5px;
+            width: 100%; /* 占满容器宽度 */
+            gap: 10px; /* 控制箭头之间的距离 */
         }
         
         .arrow {
-            font-size: 18px;
             font-weight: bold;
-            color: #666;
+            color: #fff;
+            background-color: #4CAF50;
+            border: 2px solid #4CAF50;
+            border-radius: 50%;
+            width: 30px; /* 按钮尺寸 */
+            height: 30px; /* 按钮尺寸 */
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            transition: all 0.3s ease;
+            position: relative;
         }
         
-        .arrow.up {
-            transform: rotate(0deg);
+        /* 使用边框绘制向下的箭头 */
+        .arrow-left::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 9px solid #fff; /* 白色箭头 */
         }
         
-        .arrow.down {
-            transform: rotate(0deg);
+        /* 使用边框绘制向上的箭头 */
+        .arrow-right::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-bottom: 9px solid #fff; /* 白色箭头 */
+        }
+        
+        .arrow:hover {
+            background-color: #45a049;
+            border-color: #45a049;
+            transform: scale(1.15); /* 增大悬停时的缩放效果 */
+        }
+        
+        .arrow:active {
+            transform: scale(0.95);
+        }
+        
+        .arrow:active {
+            transform: scale(0.95);
+        }
+        
+        .arrow-left {
+            /* 左侧箭头朝下 */
+        }
+        
+        .arrow-right {
+            /* 右侧箭头朝上 */
         }
     </style>
 </head>
@@ -515,41 +585,39 @@
         <div class="format-converter-container">
             <!-- 上部分输入框 -->
             <div class="format-section">
+                <div class="format-controls">
+                    <select id="formatTypeTop" class="format-type-select">
+                        <option value="json">JSON</option>
+                        <option value="yaml">YAML</option>
+                        <option value="toml">TOML</option>
+                        <option value="xml">XML</option>
+                    </select>
+                </div>
                 <div class="format-row">
                     <textarea id="formatInputTop" class="format-textarea" placeholder="输入内容"></textarea>
-                    <div class="format-controls">
-                        <select id="formatTypeTop" class="format-type-select">
-                            <option value="json">JSON</option>
-                            <option value="yaml">YAML</option>
-                            <option value="toml">TOML</option>
-                            <option value="xml">XML</option>
-                        </select>
-                        <button id="convertTopToBottomBtn" class="convert-btn">转换</button>
-                    </div>
                 </div>
             </div>
             
             <!-- 双向箭头 -->
             <div class="format-arrows">
-                <div class="arrow-up-down">
-                    <div class="arrow up">↑</div>
-                    <div class="arrow down">↓</div>
+                <div class="arrow-container">
+                    <button id="arrowLeftBtn" class="arrow arrow-left"></button>
+                    <button id="arrowRightBtn" class="arrow arrow-right"></button>
                 </div>
             </div>
             
             <!-- 下部分输入框 -->
             <div class="format-section">
+                <div class="format-controls">
+                    <select id="formatTypeBottom" class="format-type-select">
+                        <option value="json">JSON</option>
+                        <option value="yaml">YAML</option>
+                        <option value="toml">TOML</option>
+                        <option value="xml">XML</option>
+                    </select>
+                </div>
                 <div class="format-row">
                     <textarea id="formatInputBottom" class="format-textarea" placeholder="输出内容"></textarea>
-                    <div class="format-controls">
-                        <select id="formatTypeBottom" class="format-type-select">
-                            <option value="json">JSON</option>
-                            <option value="yaml">YAML</option>
-                            <option value="toml">TOML</option>
-                            <option value="xml">XML</option>
-                        </select>
-                        <button id="convertBottomToTopBtn" class="convert-btn">转换</button>
-                    </div>
                 </div>
             </div>
             
