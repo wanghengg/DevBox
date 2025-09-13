@@ -1,10 +1,13 @@
 {
   "manifest_version": 3,
-  "name": "JSON Wizard",
+  "name": "DevBox",
   "version": "1.0",
-  "description": "🧙‍♂️一个专为开发者设计的 JSON 瑞士军刀。格式化、验证、编辑、转换……一切 JSON 操作，一键搞定。",
+  "description": "🔧一个专为开发者设计的多功能工具箱。JSON处理、格式转换、编码解码、时间戳转换……多种开发常用工具，一键搞定。",
   "action": {
     "default_popup": "popup.html"
   },
-  "permissions": ["activeTab"]
+  "permissions": ["activeTab"],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; object-src 'self'"
+  }
 }
