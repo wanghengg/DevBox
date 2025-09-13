@@ -659,12 +659,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        if (sourceType === 'xml' || targetType === 'xml') {
-            if (typeof X2JS === 'undefined') {
-                throw new Error('x2js库未加载');
-            }
-        }
-        
         // 解析输入内容为 JavaScript 对象
         let obj;
         try {
@@ -699,19 +693,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     obj = window.TOML.parse(input);
                     console.log('TOML解析结果:', obj);
                     break;
-                case 'xml':
-                    // 使用 x2js 库解析 XML
-                    console.log('使用x2js解析XML:', input);
-                    console.log('X2JS全局变量:', window.X2JS);
-                    // 检查x2js库是否正确加载
-                    if (typeof window.X2JS === 'undefined') {
-                        throw new Error('x2js库未正确加载');
-                    }
-                    const x2js = new window.X2JS();
-                    console.log('x2js实例:', x2js);
-                    obj = x2js.xml2js(input);
-                    console.log('XML解析结果:', obj);
-                    break;
                 default:
                     throw new Error('不支持的源格式: ' + sourceType);
             }
@@ -741,21 +722,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         throw new Error('@iarna/toml库缺少stringify方法');
                     }
                     return window.TOML.stringify(obj);
-                case 'xml':
-                    // 使用 x2js 库序列化为 XML
-                    console.log('使用x2js序列化为XML:', obj);
-                    // 检查x2js库是否正确加载
-                    if (typeof window.X2JS === 'undefined') {
-                        throw new Error('x2js库未正确加载');
-                    }
-                    const x2js = new window.X2JS();
-                    console.log('x2js实例:', x2js);
-                    // 检查js2xml方法是否存在
-                    if (typeof x2js.js2xml !== 'function') {
-                        console.log('x2js可用方法:', Object.getOwnPropertyNames(Object.getPrototypeOf(x2js)));
-                        throw new Error('x2js.js2xml方法不存在');
-                    }
-                    return x2js.js2xml(obj);
                 default:
                     throw new Error('不支持的目标格式: ' + targetType);
             }

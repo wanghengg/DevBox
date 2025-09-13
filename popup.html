@@ -5,7 +5,6 @@
     <!-- 引入格式转换所需的库 -->
     <script src="libs/js-yaml.min.js"></script>
     <script src="libs/toml-browser.js"></script>
-    <script src="libs/x2js-lib.js"></script>
     <style>
         body {
             width: 310px;
@@ -542,8 +541,8 @@
                     <div class="input-wrapper">
                         <input type="text" id="timestampInput" class="converter-input" placeholder="输入时间戳">
                         <select id="unitSelect" class="unit-select">
-                            <option value="sec">秒级</option>
-                            <option value="ms">毫秒级</option>
+                            <option value="sec">秒</option>
+                            <option value="ms">毫秒</option>
                         </select>
                     </div>
                     <button id="timestampConvertBtn" class="convert-btn">转换</button>
@@ -587,11 +586,10 @@
             <div class="format-section">
                 <div class="format-controls">
                     <select id="formatTypeTop" class="format-type-select">
-                        <option value="json">JSON</option>
-                        <option value="yaml">YAML</option>
-                        <option value="toml">TOML</option>
-                        <option value="xml">XML</option>
-                    </select>
+                            <option value="json">JSON</option>
+                            <option value="yaml">YAML</option>
+                            <option value="toml">TOML</option>
+                        </select>
                 </div>
                 <div class="format-row">
                     <textarea id="formatInputTop" class="format-textarea" placeholder="输入内容"></textarea>
@@ -610,11 +608,10 @@
             <div class="format-section">
                 <div class="format-controls">
                     <select id="formatTypeBottom" class="format-type-select">
-                        <option value="json">JSON</option>
-                        <option value="yaml">YAML</option>
-                        <option value="toml">TOML</option>
-                        <option value="xml">XML</option>
-                    </select>
+                            <option value="json">JSON</option>
+                            <option value="yaml">YAML</option>
+                            <option value="toml">TOML</option>
+                        </select>
                 </div>
                 <div class="format-row">
                     <textarea id="formatInputBottom" class="format-textarea" placeholder="输出内容"></textarea>
