@@ -2,6 +2,9 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <!-- 引入格式转换所需的库 -->
+    <script src="libs/js-yaml.min.js"></script>
+    <script src="libs/toml-browser.js"></script>
     <style>
         body {
             width: 310px;
@@ -30,6 +33,10 @@
             align-items: center;
             gap: 10px;
             margin: 10px 0;
+        }
+        
+        #parseBtn {
+            margin-left: auto; /* 将按钮推到右侧 */
         }
         input[type="checkbox"] {
             -webkit-appearance: none;
@@ -71,8 +78,16 @@
         /* Tab 样式 */
         .tab-container {
             display: flex;
+            overflow-x: auto; /* 允许水平滚动 */
             margin-bottom: 10px;
             border-bottom: 1px solid #ddd;
+            scrollbar-width: none; /* 隐藏滚动条 (Firefox) */
+            -ms-overflow-style: none; /* 隐藏滚动条 (IE/Edge) */
+        }
+        
+        /* 隐藏滚动条 (WebKit) */
+        .tab-container::-webkit-scrollbar {
+            display: none;
         }
         
         .tab {
@@ -83,6 +98,9 @@
             border-bottom: none;
             border-radius: 4px 4px 0 0;
             margin-right: 4px;
+            flex: 0 0 auto; /* 不伸缩，宽度自适应内容 */
+            white-space: nowrap; /* 文字不换行 */
+            min-width: 0; /* 允许收缩 */
         }
         
         .tab.active {
@@ -218,6 +236,7 @@
             display: flex;
             align-items: center;
             margin-bottom: 10px;
+            width: 100%; /* 确保行占满容器宽度 */
         }
         
         .converter-row:last-child {
@@ -238,6 +257,9 @@
             display: flex;
             gap: 3px;
             margin-right: 4px;
+            width: 100%; /* 确保填满容器 */
+            min-width: 0; /* 允许收缩 */
+            box-sizing: border-box; /* 确保padding和border包含在宽度内 */
         }
         
         .converter-input {
@@ -248,12 +270,7 @@
             font-size: 12px;
             transition: border-color 0.3s;
             min-width: 0; /* 允许输入框收缩 */
-        }
-        
-        /* 时间戳输入框特殊处理 */
-        #timestampInput {
-            flex: 1;
-            min-width: 150px; /* 确保至少能输入18个字符 */
+            box-sizing: border-box; /* 确保padding和border包含在宽度内 */
         }
         
         .converter-input:focus {
@@ -262,20 +279,22 @@
             box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
         }
         
-        /* 时间戳输入框特殊处理 */
+        /* 时间戳行特殊处理 */
         #timestampInput {
-            flex: 1;
-            min-width: 100px; /* 确保至少能输入18个字符，但适应更小的宽度 */
+            flex: 3; /* 占据更多空间 */
+            min-width: 0; /* 允许收缩 */
         }
         
         .unit-select {
-            flex: 0 0 65px; /* 不伸缩，固定宽度65px确保文字完整显示 */
+            flex: 1; /* 占据较少空间 */
             padding: 5px;
             border: 1px solid #ccc;
             border-radius: 4px;
             background-color: white;
             font-size: 12px;
             cursor: pointer;
+            min-width: 60px; /* 减小宽度以适应容器 */
+            box-sizing: border-box; /* 确保padding和border包含在宽度内 */
         }
         
         .convert-btn {
@@ -290,6 +309,8 @@
             transition: background-color 0.3s;
             min-width: 45px;
             flex-shrink: 0;
+            width: 45px; /* 固定宽度确保一致性 */
+            text-align: center;
         }
         
         .convert-btn:hover {
@@ -299,6 +320,7 @@
         .button-group-center {
             text-align: center;
             margin-top: 8px;
+            width: 100%; /* 确保占满容器宽度 */
         }
         
         .clear-btn {
@@ -311,11 +333,156 @@
             font-size: 12px;
             font-weight: 500;
             transition: background-color 0.3s;
+            margin: 0 auto; /* 在容器中居中 */
         }
         
         .clear-btn:hover {
             background: #d32f2f;
         }
+        
+        /* 格式转换功能样式 */
+        .format-converter-container {
+            margin-top: 8px;
+            padding: 8px;
+        }
+        
+        .format-section {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 10px;
+            position: relative; /* 用于定位下拉框 */
+        }
+        
+        .format-row {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        
+        .format-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .format-textarea {
+            flex: 1;
+            height: 120px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            resize: vertical;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 1; /* 确保文本框在下拉框上方 */
+        }
+        
+        .format-textarea:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+            z-index: 2; /* 焦点状态下提升层级 */
+        }
+        
+        .format-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 65px; /* 固定宽度 */
+            z-index: 3; /* 调整z-index，确保不遮挡文本框边框 */
+        }
+        
+        .format-type-select {
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: white;
+            font-size: 12px;
+            cursor: pointer;
+            width: 100%; /* 占满容器宽度 */
+            box-sizing: border-box;
+        }
+        
+        .format-arrows {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 10px 0;
+        }
+        
+        .arrow-container {
+            display: flex;
+            flex-direction: row; /* 水平排列 */
+            justify-content: center; /* 居中对齐 */
+            align-items: center;
+            width: 100%; /* 占满容器宽度 */
+            gap: 10px; /* 控制箭头之间的距离 */
+        }
+        
+        .arrow {
+            font-weight: bold;
+            color: #fff;
+            background-color: #4CAF50;
+            border: 2px solid #4CAF50;
+            border-radius: 50%;
+            width: 30px; /* 按钮尺寸 */
+            height: 30px; /* 按钮尺寸 */
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        /* 使用边框绘制向下的箭头 */
+        .arrow-left::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 9px solid #fff; /* 白色箭头 */
+        }
+        
+        /* 使用边框绘制向上的箭头 */
+        .arrow-right::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-bottom: 9px solid #fff; /* 白色箭头 */
+        }
+        
+        .arrow:hover {
+            background-color: #45a049;
+            border-color: #45a049;
+            transform: scale(1.15); /* 增大悬停时的缩放效果 */
+        }
+        
+        .arrow:active {
+            transform: scale(0.95);
+        }
+        
+        .arrow:active {
+            transform: scale(0.95);
+        }
+                
     </style>
 </head>
 <body>
@@ -324,6 +491,7 @@
         <div class="tab active" data-tab="json">JSON 处理</div>
         <div class="tab" data-tab="url">URLEncode</div>
         <div class="tab" data-tab="timestamp">时间戳转换</div>
+        <div class="tab" data-tab="format">格式转换</div>
     </div>
     
     <!-- JSON 处理 Tab 内容 -->
@@ -336,7 +504,9 @@
             <button id="parseBtn">反序列化</button>
         </div>
         <div id="result"></div>
-        <button id="clearBtn" style="padding: 5px 10px; background: #f44336; color: white; border: none; cursor: pointer; margin-top: 10px;">清空所有</button>
+        <div class="button-group-center">
+            <button id="clearBtn" class="clear-btn">清空</button>
+        </div>
         <div id="outputs-container"></div>
     </div>
     
@@ -349,7 +519,9 @@
                 <button id="decodeBtn">URLDecode</button>
             </div>
             <div id="urlResult"></div>
-            <button id="urlClearBtn" style="padding: 5px 10px; background: #f44336; color: white; border: none; cursor: pointer; margin-top: 10px;">清空</button>
+            <div class="button-group-center">
+                <button id="urlClearBtn" class="clear-btn">清空</button>
+            </div>
         </div>
     </div>
     
@@ -362,8 +534,8 @@
                     <div class="input-wrapper">
                         <input type="text" id="timestampInput" class="converter-input" placeholder="输入时间戳">
                         <select id="unitSelect" class="unit-select">
-                            <option value="sec">秒级</option>
-                            <option value="ms">毫秒级</option>
+                            <option value="sec">秒</option>
+                            <option value="ms">毫秒</option>
                         </select>
                     </div>
                     <button id="timestampConvertBtn" class="convert-btn">转换</button>
@@ -395,7 +567,53 @@
             </div>
             
             <div class="button-group-center">
-                <button id="timestampClearBtn" class="clear-btn">清空所有</button>
+                <button id="timestampClearBtn" class="clear-btn">清空</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 格式转换 Tab 内容 -->
+    <div id="format-tab" class="tab-content">
+        <div class="format-converter-container">
+            <!-- 上部分输入框 -->
+            <div class="format-section">
+                <div class="format-controls">
+                    <select id="formatTypeTop" class="format-type-select">
+                            <option value="json">JSON</option>
+                            <option value="yaml">YAML</option>
+                            <option value="toml">TOML</option>
+                        </select>
+                </div>
+                <div class="format-row">
+                    <textarea id="formatInputTop" class="format-textarea" placeholder="输入内容"></textarea>
+                </div>
+            </div>
+            
+            <!-- 双向箭头 -->
+            <div class="format-arrows">
+                <div class="arrow-container">
+                    <button id="arrowLeftBtn" class="arrow arrow-left"></button>
+                    <button id="arrowRightBtn" class="arrow arrow-right"></button>
+                </div>
+            </div>
+            
+            <!-- 下部分输入框 -->
+            <div class="format-section">
+                <div class="format-controls">
+                    <select id="formatTypeBottom" class="format-type-select">
+                            <option value="json">JSON</option>
+                            <option value="yaml">YAML</option>
+                            <option value="toml">TOML</option>
+                        </select>
+                </div>
+                <div class="format-row">
+                    <textarea id="formatInputBottom" class="format-textarea" placeholder="输出内容"></textarea>
+                </div>
+            </div>
+            
+            <!-- 清空按钮 -->
+            <div class="button-group-center">
+                <button id="formatClearBtn" class="clear-btn">清空</button>
             </div>
         </div>
     </div>
