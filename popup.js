@@ -569,4 +569,114 @@ document.addEventListener('DOMContentLoaded', () => {
         easternTimeInput.value = '';
         pacificTimeInput.value = '';
     });
+    
+    // 格式转换功能
+    const formatInputTop = document.getElementById('formatInputTop');
+    const formatInputBottom = document.getElementById('formatInputBottom');
+    const formatTypeTop = document.getElementById('formatTypeTop');
+    const formatTypeBottom = document.getElementById('formatTypeBottom');
+    const convertTopToBottomBtn = document.getElementById('convertTopToBottomBtn');
+    const convertBottomToTopBtn = document.getElementById('convertBottomToTopBtn');
+    const formatClearBtn = document.getElementById('formatClearBtn');
+    
+    // 顶部转换到底部按钮事件
+    convertTopToBottomBtn.addEventListener('click', () => {
+        const input = formatInputTop.value.trim();
+        if (!input) {
+            alert('请输入需要转换的内容');
+            return;
+        }
+        
+        const sourceType = formatTypeTop.value;
+        const targetType = formatTypeBottom.value;
+        
+        try {
+            const result = convertFormat(input, sourceType, targetType);
+            formatInputBottom.value = result;
+        } catch (error) {
+            alert('转换失败: ' + error.message);
+        }
+    });
+    
+    // 底部转换到顶部按钮事件
+    convertBottomToTopBtn.addEventListener('click', () => {
+        const input = formatInputBottom.value.trim();
+        if (!input) {
+            alert('请输入需要转换的内容');
+            return;
+        }
+        
+        const sourceType = formatTypeBottom.value;
+        const targetType = formatTypeTop.value;
+        
+        try {
+            const result = convertFormat(input, sourceType, targetType);
+            formatInputTop.value = result;
+        } catch (error) {
+            alert('转换失败: ' + error.message);
+        }
+    });
+    
+    // 格式转换清空按钮事件
+    formatClearBtn.addEventListener('click', () => {
+        formatInputTop.value = '';
+        formatInputBottom.value = '';
+    });
+    
+    // 格式转换核心函数
+    function convertFormat(input, sourceType, targetType) {
+        // 如果源类型和目标类型相同，直接返回输入内容
+        if (sourceType === targetType) {
+            return input;
+        }
+        
+        // 解析输入内容为 JavaScript 对象
+        let obj;
+        try {
+            switch (sourceType) {
+                case 'json':
+                    obj = JSON.parse(input);
+                    break;
+                case 'yaml':
+                    // 使用 js-yaml 库解析 YAML
+                    obj = jsyaml.load(input);
+                    break;
+                case 'toml':
+                    // 使用 @iarna/toml 库解析 TOML
+                    obj = TOML.parse(input);
+                    break;
+                case 'xml':
+                    // 使用 x2js 库解析 XML
+                    const x2js = new X2JS();
+                    obj = x2js.xml2js(input);
+                    break;
+                default:
+                    throw new Error('不支持的源格式: ' + sourceType);
+            }
+        } catch (error) {
+            throw new Error('解析源格式失败: ' + error.message);
+        }
+        
+        // 将 JavaScript 对象转换为目标格式
+        try {
+            switch (targetType) {
+                case 'json':
+                    return JSON.stringify(obj, null, 2);
+                case 'yaml':
+                    // 使用 js-yaml 库序列化为 YAML
+                    return jsyaml.dump(obj);
+                case 'toml':
+                    // 使用 @iarna/toml 库序列化为 TOML
+                    return TOML.stringify(obj);
+                case 'xml':
+                    // 使用 x2js 库序列化为 XML
+                    const x2js = new X2JS();
+                    return x2js.js2xml(obj);
+                default:
+                    throw new Error('不支持的目标格式: ' + targetType);
+            }
+        } catch (error) {
+            throw new Error('序列化为目标格式失败: ' + error.message);
+        }
+    }
 });
