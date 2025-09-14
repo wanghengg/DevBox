@@ -8,7 +8,6 @@
   },
   "permissions": ["activeTab"],
   "content_security_policy": {
-<<<<<<< HEAD
     "extension_pages": "script-src 'self'; object-src 'self'"
   },
   "web_accessible_resources": [
@@ -17,8 +16,4 @@
       "matches": ["<all_urls>"]
     }
   ]
-=======
-    "extension_pages": "script-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; object-src 'self'"
-  }
->>>>>>> master
 }
